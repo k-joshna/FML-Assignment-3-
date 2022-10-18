@@ -1,0 +1,134 @@
+---
+title: "assignment_3"
+author: "joshna katta"
+date: "2022-10-18"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+#LOADING LIBRARY FUNCTIONS
+library(caret)
+library(class)
+library(e1071)
+library(dplyr)
+library(reshape)
+library(reshape2)
+```
+
+```{r}
+#READING CSV FILE
+data1<-read.csv("C:/Users/sudhakar/Downloads/UniversalBank (1).csv",header=TRUE)
+head(data1)
+#CONVERTING TO FACTORS 
+data1$Personal.Loan <- as.factor(data1$Personal.Loan)
+data1$Online <- as.factor(data1$Online)
+data1$CreditCard <- as.factor(data1$CreditCard)
+is.factor(data1$Personal.Loan)
+is.factor(data1$Online)
+is.factor(data1$CreditCard)
+```
+
+
+```{r}
+#PARTITIONING DATA TO 60:40 RATIO
+set.seed(350)
+data_partition<-createDataPartition(data1$Personal.Loan,p=.6,list=FALSE,times=1)
+train<-data1[data_partition,]
+valid<-data1[-data_partition,]
+head(train)
+```
+
+
+
+
+
+{A: Creating a pivot table for the training data with Online as a column variable,
+CC as a row variable, and Loan as a secondary row variable}
+
+```{r}
+Melt_training = melt(train,id=c("CreditCard","Personal.Loan"),variable= "Online")
+
+cast_training=dcast(Melt_training,CreditCard+Personal.Loan~Online)
+set.seed(15)
+cast_training <-cast_training[c(1,2,14)]
+
+cast_training
+```
+B: The probability of loan acceptance conditional on 
+having a bank credit card
+
+
+#(Loan=1,CC = 1,Online=1)=(53 /(468+53))=0.1017274
+
+
+
+C:Creating separate pivot tables for the training data with Loan (rows) as a 
+function of Online (columns)
+
+```{r}
+
+Melt_training1 <- melt(train,id=c("Personal.Loan"),variable = "Online")
+
+cast_training1  <- dcast(Melt_training1,Personal.Loan~Online)
+
+cast_training1 <-cast_training1[c(1,13)]
+
+cast_training1
+
+set.seed(15)
+
+melt_data2 <- melt(train,id=c("CreditCard"),variable = "Online")
+
+cast_training2 <- dcast(melt_data2,CreditCard~Online)
+
+cast_training2 <-cast_training2[c(1,14)]
+
+cast_training2
+```
+
+
+
+```{r}
+set.seed(15)
+Data1 <- train[c(13,10,14)]
+
+table(Data1[,c(3,2)])
+
+
+
+
+table(Data1[,c(1,2)])
+
+
+
+
+table(Data1[,c(2)])
+
+
+```
+
+
+
+```{r}
+set.seed(15)
+
+naivebayes = naiveBayes(Personal.Loan~.,data=Data1)
+
+naivebayes
+
+set.seed(15)
+```
+
+
+
+
+
